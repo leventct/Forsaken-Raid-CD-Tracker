@@ -3,8 +3,10 @@ request.HandleRequest = function(____, sender, spellName, target)
     local filter = RaidCD.config.db.reqFilter
     local allSpells = RaidCD.config.db.trackedSpells
     local foundId = 0
-    local ownedId = 0
     local spellIcon = ""
+    local anyOnCd = false
+    local cdOwnedId = 0
+    local readyOwnedId = 0
     for cls in pairs(allSpells) do
         local classSpells = allSpells[cls]
         for ____, trackedId in ipairs(classSpells) do
@@ -18,12 +20,19 @@ request.HandleRequest = function(____, sender, spellName, target)
                 end
                 local s, d = GetSpellCooldown(trackedId)
                 if s and s > 0 and d and d > 1.5 then
-                    ownedId = trackedId
+                    anyOnCd = true
+                    cdOwnedId = trackedId
                 elseif s == 0 and d == 0 and IsSpellKnown and IsSpellKnown(trackedId, false) then
-                    ownedId = trackedId
+                    readyOwnedId = trackedId
                 end
             end
         end
+    end
+    local ownedId = 0
+    if anyOnCd then
+        ownedId = cdOwnedId
+    else
+        ownedId = readyOwnedId
     end
     if foundId == 0 then
         if filter ~= "all" then

@@ -69,17 +69,18 @@ CreateIndependentManager = function(groupKey)
             if RaidCD.config.db.barDisplayMode == "collapsed" or RaidCD.config.db.barDisplayMode == "supercompact" then
                 local aggregated = {}
                 for ____, entry in ipairs(entries) do
-                    local spellId = entry.spellId
-                    if aggregated[spellId] == nil then
-                        aggregated[spellId] = {
-                            spellId = spellId,
+                    local spellInfo = {GetSpellInfo(entry.spellId)}
+                    local spellName = (spellInfo and spellInfo[1]) or ("Spell#" .. tostring(entry.spellId))
+                    if aggregated[spellName] == nil then
+                        aggregated[spellName] = {
+                            spellId = entry.spellId,
                             class = entry.class,
                             readyCount = 0,
                             shortestRemaining = nil,
                             data = {ready = false, remaining = 0, duration = entry.data.duration or 30, lastUpdate = GetTime()}
                         }
                     end
-                    local aggr = aggregated[spellId]
+                    local aggr = aggregated[spellName]
                     local timeSinceUpdate = now - (entry.data.lastUpdate or now)
                     local liveRemaining = math.max(0, (entry.data.remaining or 0) - timeSinceUpdate)
                     local isReady = entry.data.ready or liveRemaining <= 0.5
@@ -94,7 +95,7 @@ CreateIndependentManager = function(groupKey)
                     end
                 end
                 entries = {}
-                for spellId, aggr in pairs(aggregated) do
+                for spellName, aggr in pairs(aggregated) do
                     local label
                     if aggr.readyCount > 0 then
                         label = tostring(aggr.readyCount)
@@ -103,9 +104,9 @@ CreateIndependentManager = function(groupKey)
                     end
                     local isSuperCompact = RaidCD.config.db.barDisplayMode == "supercompact"
                     table.insert(entries, {
-                        key = tostring(spellId),
+                        key = spellName,
                         playerName = label,
-                        spellId = spellId,
+                        spellId = aggr.spellId,
                         data = aggr.data,
                         class = aggr.class,
                         collapsed = true,
@@ -340,17 +341,18 @@ barManager.Refresh = function()
     elseif RaidCD.config.db.barDisplayMode == "collapsed" or RaidCD.config.db.barDisplayMode == "supercompact" then
         local aggregated = {}
         for ____, entry in ipairs(mainEntries) do
-            local spellId = entry.spellId
-            if aggregated[spellId] == nil then
-                aggregated[spellId] = {
-                    spellId = spellId,
+            local spellInfo = {GetSpellInfo(entry.spellId)}
+            local spellName = (spellInfo and spellInfo[1]) or ("Spell#" .. tostring(entry.spellId))
+            if aggregated[spellName] == nil then
+                aggregated[spellName] = {
+                    spellId = entry.spellId,
                     class = entry.class,
                     readyCount = 0,
                     shortestRemaining = nil,
                     data = {ready = false, remaining = 0, duration = entry.data.duration or 30, lastUpdate = GetTime()}
                 }
             end
-            local aggr = aggregated[spellId]
+            local aggr = aggregated[spellName]
             local timeSinceUpdate = now - (entry.data.lastUpdate or now)
             local liveRemaining = math.max(0, (entry.data.remaining or 0) - timeSinceUpdate)
             local isReady = entry.data.ready or liveRemaining <= 0.5
@@ -365,7 +367,7 @@ barManager.Refresh = function()
             end
         end
         mainEntries = {}
-        for spellId, aggr in pairs(aggregated) do
+        for spellName, aggr in pairs(aggregated) do
             local label
             if aggr.readyCount > 0 then
                 label = tostring(aggr.readyCount)
@@ -374,9 +376,9 @@ barManager.Refresh = function()
             end
             local isSuperCompact = RaidCD.config.db.barDisplayMode == "supercompact"
             table.insert(mainEntries, {
-                key = tostring(spellId),
+                key = spellName,
                 playerName = label,
-                spellId = spellId,
+                spellId = aggr.spellId,
                 data = aggr.data,
                 class = aggr.class,
                 collapsed = true,

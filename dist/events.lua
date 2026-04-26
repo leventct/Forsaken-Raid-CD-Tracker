@@ -79,22 +79,52 @@ events.HandleCooldownUpdate = function()
     end
     local now = GetTime()
     local allSpells = RaidCD.config.db.trackedSpells
+    local cdMap = {}
     for cls in pairs(allSpells) do
         local classSpells = allSpells[cls]
         for ____, spellId in ipairs(classSpells) do
             if RaidCD.cooldown:PlayerKnowsSpell(spellId) then
-                local cd = RaidCD.cooldown:GetSpellCD(spellId)
-                local prev = myData[spellId]
-                if prev ~= nil then
-                    local prevRemaining = math.max(0, (prev.remaining or 0) - (now - (prev.lastUpdate or now)))
-                    local diff = math.abs(cd.remaining - prevRemaining)
-                    if diff > 1 or (not prev.ready and cd.ready) then
-                        RaidCD.state:UpdateSelf()
-                        RaidCD.broadcast:Send()
-                        RaidCD.ui:Refresh()
-                        return
-                    end
+                cdMap[spellId] = RaidCD.cooldown:GetSpellCD(spellId)
+            end
+        end
+    end
+    local nameGroups = {}
+    for spellId in pairs(cdMap) do
+        local name = GetSpellInfo(spellId)
+        if name then
+            nameGroups[name] = nameGroups[name] or {}
+            nameGroups[name][#nameGroups[name] + 1] = spellId
+        end
+    end
+    for name, ids in pairs(nameGroups) do
+        if #ids > 1 then
+            local maxRem = 0
+            local maxDur = 0
+            for _, id in ipairs(ids) do
+                if cdMap[id].remaining > maxRem then
+                    maxRem = cdMap[id].remaining
+                    maxDur = cdMap[id].duration
                 end
+            end
+            if maxRem > 0 then
+                for _, id in ipairs(ids) do
+                    cdMap[id].remaining = maxRem
+                    cdMap[id].duration = maxDur
+                    cdMap[id].ready = false
+                end
+            end
+        end
+    end
+    for spellId, cd in pairs(cdMap) do
+        local prev = myData[spellId]
+        if prev ~= nil then
+            local prevRemaining = math.max(0, (prev.remaining or 0) - (now - (prev.lastUpdate or now)))
+            local diff = math.abs(cd.remaining - prevRemaining)
+            if diff > 1 or (not prev.ready and cd.ready) then
+                RaidCD.state:UpdateSelf()
+                RaidCD.broadcast:Send()
+                RaidCD.ui:Refresh()
+                return
             end
         end
     end
