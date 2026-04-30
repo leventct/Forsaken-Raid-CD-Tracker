@@ -1,0 +1,31 @@
+## Interface: 30300
+## Title: Forsaken Raid CD Tracker
+## Author: alkies
+## Version: 1.1.0
+## Notes: Tracks external raid cooldowns with live broadcast and request notifications.
+## SavedVariables: RaidCooldownTrackerDB
+
+dist\core.lua
+dist\config.lua
+dist\cooldown.lua
+dist\roster.lua
+dist\state.lua
+dist\broadcast.lua
+dist\comm.lua
+dist\events.lua
+dist\sorting.lua
+dist\request.lua
+dist\ui\anchor.lua
+dist\ui\cooldownBar.lua
+dist\ui\barManager.lua
+dist\ui\notification.lua
+dist\ui\notifManager.lua
+dist\ui\demo.lua
+dist\ui\settings\panel.lua
+dist\ui\settings\widgets\general.lua
+dist\ui\settings\widgets\display.lua
+dist\ui\settings\widgets\spells.lua
+dist\ui\settings\widgets\buffs.lua
+dist\ui\settings\widgets\requests.lua
+dist\ui\buffWindow.lua
+dist\index.lua
