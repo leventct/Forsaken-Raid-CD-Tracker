@@ -164,12 +164,6 @@ CreateGroupAnchor = function(groupName)
     dot:SetPoint("CENTER", anchorFrame, "CENTER", 0, 0)
     dot:SetTexture("Interface\\ICONS\\ability_bossashvane_icon01")
 
-    local label = anchorFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    label:SetPoint("BOTTOM", anchorFrame, "TOP", 0, 2)
-    label:SetText(groupName)
-    label:SetTextColor(0.6, 0.6, 0.8, 0.9)
-    label:Hide()
-
     anchorFrame:SetScript("OnEnter", function()
         if not RaidCD.config.db.locked then
             GameTooltip_SetDefaultAnchor(GameTooltip, anchorFrame)
@@ -212,7 +206,6 @@ CreateGroupAnchor = function(groupName)
             border:Hide()
             fill:Hide()
             dot:Hide()
-            label:Hide()
             anchorFrame:Hide()
             anchorFrame:EnableMouse(false)
             return
@@ -221,14 +214,12 @@ CreateGroupAnchor = function(groupName)
             border:Hide()
             fill:Hide()
             dot:Hide()
-            label:Hide()
             anchorFrame:Hide()
             anchorFrame:EnableMouse(false)
         else
             border:Hide()
             fill:Hide()
             dot:Show()
-            label:Show()
             anchorFrame:Show()
             anchorFrame:EnableMouse(true)
         end
@@ -242,7 +233,6 @@ CreateGroupAnchor = function(groupName)
         border = border,
         fill = fill,
         dot = dot,
-        label = label,
         RestorePosition = RestorePosition,
         UpdateVisual = UpdateVisual,
         groupName = groupName

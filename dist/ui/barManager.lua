@@ -2,6 +2,18 @@ barManager = {}
 barManager.bars = {}
 barManager.independentManagers = {}
 
+local ANCHOR_LOCS = {
+    TOPLEFT     = {myPoint = "TOPLEFT",    relPoint = "BOTTOMLEFT",  yMul = -1},
+    BOTTOMLEFT  = {myPoint = "BOTTOMLEFT", relPoint = "TOPLEFT",     yMul =  1},
+    TOPRIGHT    = {myPoint = "TOPRIGHT",   relPoint = "BOTTOMRIGHT", yMul = -1},
+    BOTTOMRIGHT = {myPoint = "BOTTOMRIGHT",relPoint = "TOPRIGHT",    yMul =  1},
+}
+
+local function GetBarAnchor(anchor)
+    local loc = ANCHOR_LOCS[RaidCD.config.db.anchorLocation] or ANCHOR_LOCS.TOPLEFT
+    return loc.myPoint, anchor, loc.relPoint, 0
+end
+
 IsGroupIndependent = function(groupKey)
     return RaidCD.config.db.independentAnchors and RaidCD.config.db.independentAnchors[groupKey] ~= nil and RaidCD.config.db.independentAnchors[groupKey] ~= false
 end
@@ -135,7 +147,8 @@ CreateIndependentManager = function(groupKey)
                     header.chipBg:SetWidth(textWidth + 8)
                     header.frame:SetWidth(RaidCD.config.db.barWidth)
                     header.frame:ClearAllPoints()
-                    header.frame:SetPoint("TOPLEFT", anchorData.frame, "BOTTOMLEFT", 0, -yOff)
+                    local aP, aR, aRP = GetBarAnchor(anchorData.frame)
+                    header.frame:SetPoint(aP, aR, aRP, 0, yOff * ANCHOR_LOCS[RaidCD.config.db.anchorLocation].yMul)
                     header.frame:Show()
                     yOff = yOff + 14
                 end
@@ -144,7 +157,8 @@ CreateIndependentManager = function(groupKey)
                     local bar = self.bars[barIndex]
                     RaidCD.ui.UpdateCooldownBar(bar, entry, now)
                     bar.frame:ClearAllPoints()
-                    bar.frame:SetPoint("TOPLEFT", anchorData.frame, "BOTTOMLEFT", 0, -yOff)
+                    local bP, bR, bRP = GetBarAnchor(anchorData.frame)
+                    bar.frame:SetPoint(bP, bR, bRP, 0, yOff * ANCHOR_LOCS[RaidCD.config.db.anchorLocation].yMul)
                     yOff = yOff + step
                 end
             end
@@ -405,12 +419,13 @@ barManager.Refresh = function()
                 header.headerLabel:SetFont(STANDARD_TEXT_FONT or "Fonts\\FRIZQT__.TTF", RaidCD.config.db.headerFontSize, "OUTLINE")
                 header.frame:SetWidth(RaidCD.config.db.barWidth)
                 header.frame:ClearAllPoints()
+                local mP, mR, mRP = GetBarAnchor(RaidCD.ui.anchor)
                 header.frame:SetPoint(
-                    "TOPLEFT",
-                    RaidCD.ui.anchor,
-                    "BOTTOMLEFT",
+                    mP,
+                    mR,
+                    mRP,
                     0,
-                    -yOff
+                    yOff * ANCHOR_LOCS[RaidCD.config.db.anchorLocation].yMul
                 )
                 header.frame:Show()
                 headerCount = headerCount + 1
@@ -422,12 +437,13 @@ barManager.Refresh = function()
         if barIndex < #barManager.bars then
             RaidCD.ui.UpdateCooldownBar(barManager.bars[barIndex + 1], entry, now)
             barManager.bars[barIndex + 1].frame:ClearAllPoints()
+            local nP, nR, nRP = GetBarAnchor(RaidCD.ui.anchor)
             barManager.bars[barIndex + 1].frame:SetPoint(
-                "TOPLEFT",
-                RaidCD.ui.anchor,
-                "BOTTOMLEFT",
+                nP,
+                nR,
+                nRP,
                 0,
-                -yOff
+                yOff * ANCHOR_LOCS[RaidCD.config.db.anchorLocation].yMul
             )
             barCount = barCount + 1
             yOff = yOff + step

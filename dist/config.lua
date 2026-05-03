@@ -33,6 +33,7 @@ MakeDefaults = function() return {
     notifDuration = 5,
     debug = false,
     locked = false,
+    anchorLocation = "TOPLEFT",
     position = {point = "CENTER", x = 0, y = 0},
     notifPosition = {point = "TOP", x = 0, y = -200},
     barWidth = 230,
@@ -73,7 +74,6 @@ MakeDefaults = function() return {
     buffShowInactive = {},
     buffDeletedPresets = {},
     buffGroupOrder = {},
-    minimapAngle = nil,
     serverMode = false
 } end
 defaults = MakeDefaults()

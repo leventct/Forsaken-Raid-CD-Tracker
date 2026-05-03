@@ -9,87 +9,36 @@ local HEADER_H = 25
 local TITLE_H = 28
 local PADDING = 5
 
--- ── Minimap Button ─────────────────────────────────────────────
-
-local MINIMAP_RADIUS = 78
-
-local function PositionMinimapButton(button, angle)
-    button:ClearAllPoints()
-    local x = MINIMAP_RADIUS * math.cos(angle)
-    local y = MINIMAP_RADIUS * math.sin(angle)
-    button:SetPoint("CENTER", Minimap, "CENTER", x, y)
-end
+-- ── Minimap Button (LibDataBroker + LibDBIcon) ──────────────────
 
 function buffWindow.InitMinimapButton()
-    local button = CreateFrame("Frame", "RaidCD_BuffMinimapButton", Minimap)
-    button:SetWidth(31)
-    button:SetHeight(31)
-    button:SetFrameStrata("HIGH")
-    button:EnableMouse(true)
-    button:RegisterForDrag("LeftButton")
+    local ldb = LibStub("LibDataBroker-1.1")
+    local ldbicon = LibStub("LibDBIcon-1.0")
 
-    local angle = RaidCD.config.db.minimapAngle or math.rad(135)
-    PositionMinimapButton(button, angle)
-
-    local icon = button:CreateTexture(nil, "ARTWORK")
-    icon:SetTexture("Interface\\Icons\\INV_Potion_93")
-    icon:SetWidth(22)
-    icon:SetHeight(22)
-    icon:SetPoint("CENTER", button, "CENTER", 0, 0)
-
-    local highlight = button:CreateTexture(nil, "HIGHLIGHT")
-    highlight:SetTexture("Interface\\Icons\\INV_Potion_44")
-    highlight:SetWidth(26)
-    highlight:SetHeight(26)
-    highlight:SetPoint("CENTER", button, "CENTER", 0, 0)
-
-    button:SetScript("OnDragStart", function(self)
-        self.isDragging = true
-    end)
-    button:SetScript("OnDragStop", function(self)
-        self.isDragging = false
-        RaidCD.config.db.minimapAngle = self.currentAngle
-    end)
-    button:SetScript("OnUpdate", function(self)
-        if not self.isDragging then return end
-        local mx, my = GetCursorPosition()
-        local scale = Minimap:GetEffectiveScale()
-        mx, my = mx / scale, my / scale
-        local cx, cy = Minimap:GetCenter()
-        self.currentAngle = math.atan2(my - cy, mx - cx)
-        PositionMinimapButton(self, self.currentAngle)
-    end)
-
-    button:SetScript("OnMouseUp", function(self, btn)
-        if self.isDragging then return end
-        if btn == "LeftButton" then
-            if buffWindow.mainFrame then
-                local visible = buffWindow.mainFrame:IsVisible()
-                if not visible then
-                    buffWindow.Refresh()
+    local dataobj = ldb:NewDataObject("RaidCooldownTracker", {
+        type = "launcher",
+        icon = "Interface\\Icons\\INV_Potion_93",
+        OnClick = function(self, button)
+            if button == "LeftButton" then
+                if buffWindow.mainFrame then
+                    local visible = buffWindow.mainFrame:IsVisible()
+                    if not visible then
+                        buffWindow.Refresh()
+                    end
+                    buffWindow.mainFrame:SetShown(not visible)
                 end
-                buffWindow.mainFrame:SetShown(not visible)
+            elseif button == "RightButton" then
+                InterfaceOptionsFrame_OpenToCategory("RaidCooldownTracker")
+                InterfaceOptionsFrame_OpenToCategory("RaidCooldownTracker")
             end
-        elseif btn == "RightButton" then
-            InterfaceOptionsFrame_OpenToCategory("RaidCooldownTracker")
-            InterfaceOptionsFrame_OpenToCategory("RaidCooldownTracker")
-        end
-    end)
+        end,
+        OnTooltipShow = function(tooltip)
+            tooltip:AddLine("Click to view tracked buff list", 1, 1, 1)
+            tooltip:AddLine("Right-click for settings", 0.6, 0.6, 0.6, 1)
+        end,
+    })
 
-    button:SetScript("OnEnter", function(self)
-        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-        GameTooltip:AddLine("Click to view tracked buff list", 1, 1, 1)
-        GameTooltip:AddLine("Right-click for settings", 0.6, 0.6, 0.6, 1)
-        GameTooltip:AddLine("Drag to reposition", 0.6, 0.6, 0.6, 1)
-        GameTooltip:Show()
-    end)
-
-    button:SetScript("OnLeave", function()
-        GameTooltip:Hide()
-    end)
-
-    button.currentAngle = angle
-    buffWindow.minimapButton = button
+    ldbicon:Register("RaidCooldownTracker", dataobj, RaidCD.config.db)
 end
 
 -- ── Roster ──────────────────────────────────────────────────────

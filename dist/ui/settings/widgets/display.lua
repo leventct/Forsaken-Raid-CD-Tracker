@@ -182,6 +182,42 @@ end)
 SliderValue(barBgOpacitySlider):SetText(tostring(math.floor((RaidCD.config.db.barBgOpacity or 0.8) * 100)))
 y = y - 46
 
+-- Anchor Location
+local anchorLocLabel = scroll:CreateFontString(nil, "ARTWORK", "GameFontNormal")
+anchorLocLabel:SetPoint("TOPLEFT", scroll, "TOPLEFT", 0, y)
+y = y - 20
+anchorLocLabel:SetText("Anchor Location:")
+local anchorLocDropdown = CreateFrame("Frame", "RaidCD_AnchorLocDropdown", scroll, "UIDropDownMenuTemplate")
+anchorLocDropdown:SetPoint("TOPLEFT", anchorLocLabel, "BOTTOMLEFT", -12, -4)
+y = y - 44
+
+local ANCHOR_LOC_LABELS = {"Top Left", "Bottom Left", "Top Right", "Bottom Right"}
+local ANCHOR_LOC_VALUES = {"TOPLEFT", "BOTTOMLEFT", "TOPRIGHT", "BOTTOMRIGHT"}
+
+local function UpdateAnchorLocText()
+    local idx = 1
+    for i, v in ipairs(ANCHOR_LOC_VALUES) do
+        if v == RaidCD.config.db.anchorLocation then idx = i; break end
+    end
+    UIDropDownMenu_SetText(anchorLocDropdown, ANCHOR_LOC_LABELS[idx])
+end
+
+anchorLocDropdown.initialize = function()
+    for i, label in ipairs(ANCHOR_LOC_LABELS) do
+        UIDropDownMenu_AddButton({
+            text = label,
+            value = ANCHOR_LOC_VALUES[i],
+            checked = RaidCD.config.db.anchorLocation == ANCHOR_LOC_VALUES[i],
+            func = function()
+                RaidCD.config.db.anchorLocation = ANCHOR_LOC_VALUES[i]
+                UpdateAnchorLocText()
+                RaidCD_OnSettingChanged()
+            end
+        })
+    end
+end
+UpdateAnchorLocText()
+
 -- Notifications header
 local notifHeader = scroll:CreateFontString(nil, "ARTWORK", "GameFontNormal")
 notifHeader:SetPoint("TOPLEFT", scroll, "TOPLEFT", 0, y)
